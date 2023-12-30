@@ -1,0 +1,2283 @@
+Design and Analysis of Algorithm Lab Manual
+
+SORTING
+
+Lab 1) Write a program in python to implement Sorting Algorithms.
+
+    a) INSERTION SORT
+
+
+Insertion Sort Algorithm
+
+insertionSort(array)
+  mark first element as sorted
+  for each unsorted element X
+    'extract' the element X
+    for j <- lastSortedIndex down to 0
+      if current element j > X
+        move sorted element to the right by 1
+    break loop and insert X here
+end insertionSort
+
+
+
+Insertion Sort in Python
+
+def insertionSort(array):
+
+    for step in range(1, len(array)):
+        key = array[step]
+        j = step - 1
+        
+        # Compare key with each element on the left of it until an element smaller than it is found
+        # For descending order, change key<array[j] to key>array[j].        
+        while j >= 0 and key < array[j]:
+            array[j + 1] = array[j]
+            j = j - 1
+        
+        # Place key at after the element just smaller than it.
+        array[j + 1] = key
+
+
+data = [9, 5, 1, 4, 3]
+insertionSort(data)
+print('Sorted Array in Ascending Order:')
+print(data)
+
+OUTPUT
+
+Sorted Array in Ascending Order:
+[1, 3, 4, 5, 9]
+
+---------------------------------------------------------------------------
+b) BUBBLE SORT
+
+Bubble Sort Algorithm
+bubbleSort(list1)
+  for i <- 1 to indexOfLastUnsortedElement-1
+    if leftElement > rightElement
+      swap leftElement and rightElement
+end bubbleSort
+
+
+Program
+def bubble_sort(list1):  
+    # Outer loop for traverse the entire list  
+    for i in range(0,len(list1)-1):  
+        for j in range(len(list1)-1):  
+            if(list1[j]>list1[j+1]):  
+                temp = list1[j]  
+                list1[j] = list1[j+1]  
+                list1[j+1] = temp  
+    return list1  
+  
+list1 = [5, 3, 8, 6, 7, 2]  
+print("The unsorted list is: ", list1)  
+# Calling the bubble sort function  
+print("The sorted list is: ", bubble_sort(list1))  
+
+OUTPUT
+The unsorted list is:  [5, 3, 8, 6, 7, 2]
+The sorted list is:  [2, 3, 5, 6, 7, 8]
+
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+c)  SELECTION SORT
+
+Selection Sort Algorithm
+
+selectionSort(array, size)
+  repeat (size - 1) times
+  set the first unsorted element as the minimum
+  for each of the unsorted elements
+    if element < currentMinimum
+      set element as new minimum
+  swap minimum with first unsorted position
+end selectionSort
+
+
+
+# Selection sort Program in Python
+
+
+def selectionSort(array, size):
+   
+    for step in range(size):
+        min_idx = step
+
+        for i in range(step + 1, size):
+         
+            # to sort in descending order, change > to < in this line
+            # select the minimum element in each loop
+            if array[i] < array[min_idx]:
+                min_idx = i
+         
+        # put min at the correct position
+        (array[step], array[min_idx]) = (array[min_idx], array[step])
+
+
+data = [-2, 45, 0, 11, -9]
+size = len(data)
+selectionSort(data, size)
+print('Sorted Array in Ascending Order:')
+print(data)
+
+
+Output
+
+Sorted Array in Ascending Order:
+[-9, -2, 0, 11, 45]
+
+
+
+================================================
+
+LAB-2 
+
+2) Write a program in python to implement B- tree illustrating,
+a) Searching an Element
+b) Inserting an Element
+c) Deleting an Element
+
+
+Algorithm for Searching an Element
+
+BtreeSearch(x, k)
+ i = 1
+ while i ≤ n[x] and k ≥ keyi[x]        // n[x] means number of keys in x node
+    do i = i + 1
+if i  n[x] and k = keyi[x]
+    then return (x, i)
+if leaf [x]
+    then return NIL
+else
+    return BtreeSearch(ci[x], k)
+
+
+# Searching a key on a B-tree in Python
+
+
+# Create a node
+class BTreeNode:
+  def __init__(self, leaf=False):
+    self.leaf = leaf
+    self.keys = []
+    self.child = []
+
+
+# Tree
+class BTree:
+  def __init__(self, t):
+    self.root = BTreeNode(True)
+    self.t = t
+
+    # Insert node
+  def insert(self, k):
+    root = self.root
+    if len(root.keys) == (2 * self.t) - 1:
+      temp = BTreeNode()
+      self.root = temp
+      temp.child.insert(0, root)
+      self.split_child(temp, 0)
+      self.insert_non_full(temp, k)
+    else:
+      self.insert_non_full(root, k)
+
+    # Insert nonfull
+  def insert_non_full(self, x, k):
+    i = len(x.keys) - 1
+    if x.leaf:
+      x.keys.append((None, None))
+      while i >= 0 and k[0] < x.keys[i][0]:
+        x.keys[i + 1] = x.keys[i]
+        i -= 1
+      x.keys[i + 1] = k
+    else:
+      while i >= 0 and k[0] < x.keys[i][0]:
+        i -= 1
+      i += 1
+      if len(x.child[i].keys) == (2 * self.t) - 1:
+        self.split_child(x, i)
+        if k[0] > x.keys[i][0]:
+          i += 1
+      self.insert_non_full(x.child[i], k)
+
+    # Split the child
+  def split_child(self, x, i):
+    t = self.t
+    y = x.child[i]
+    z = BTreeNode(y.leaf)
+    x.child.insert(i + 1, z)
+    x.keys.insert(i, y.keys[t - 1])
+    z.keys = y.keys[t: (2 * t) - 1]
+    y.keys = y.keys[0: t - 1]
+    if not y.leaf:
+      z.child = y.child[t: 2 * t]
+      y.child = y.child[0: t - 1]
+
+  # Print the tree
+  def print_tree(self, x, l=0):
+    print("Level ", l, " ", len(x.keys), end=":")
+    for i in x.keys:
+      print(i, end=" ")
+    print()
+    l += 1
+    if len(x.child) > 0:
+      for i in x.child:
+        self.print_tree(i, l)
+
+  # Search key in the tree
+  def search_key(self, k, x=None):
+    if x is not None:
+      i = 0
+      while i < len(x.keys) and k > x.keys[i][0]:
+        i += 1
+      if i < len(x.keys) and k == x.keys[i][0]:
+        return (x, i)
+      elif x.leaf:
+        return None
+      else:
+        return self.search_key(k, x.child[i])
+      
+    else:
+      return self.search_key(k, self.root)
+
+
+def main():
+  B = BTree(3)
+
+  for i in range(10):
+    B.insert((i, 2 * i))
+
+  B.print_tree(B.root)
+
+  if B.search_key(8) is not None:
+    print("\nFound")
+  else:
+    print("\nNot Found")
+
+
+if __name__ == '__main__':
+  main()
+
+
+Worst case Time complexity: Θ(log n)
+
+Average case Time complexity: Θ(log n)
+
+Best case Time complexity: Θ(log n)
+
+Average case Space complexity: Θ(n)
+
+Worst case Space complexity: Θ(n)
+
+-------------------------------------------------------
+
+Insertion into a B-tree
+
+Algorithm for Inserting an Element
+
+BreeInsertion(T, k)
+r  root[T]
+if n[r] = 2t - 1
+    s = AllocateNode()
+    root[T] = s
+    leaf[s] = FALSE
+    n[s] <- 0
+    c1[s] <- r
+    BtreeSplitChild(s, 1, r)
+    BtreeInsertNonFull(s, k)
+else BtreeInsertNonFull(r, k)
+BtreeInsertNonFull(x, k)
+i = n[x]
+if leaf[x]
+    while i ≥ 1 and k < keyi[x]
+        keyi+1 [x] = keyi[x]
+        i = i - 1
+    keyi+1[x] = k
+    n[x] = n[x] + 1
+else while i ≥ 1 and k < keyi[x]
+        i = i - 1
+    i = i + 1
+    if n[ci[x]] == 2t - 1
+        BtreeSplitChild(x, i, ci[x])
+        if k &rt; keyi[x]
+            i = i + 1
+    BtreeInsertNonFull(ci[x], k)
+BtreeSplitChild(x, i)
+BtreeSplitChild(x, i, y)
+z = AllocateNode()
+leaf[z] = leaf[y]
+n[z] = t - 1
+for j = 1 to t - 1
+    keyj[z] = keyj+t[y]
+if not leaf [y]
+    for j = 1 to t
+        cj[z] = cj + t[y]
+n[y] = t - 1
+for j = n[x] + 1 to i + 1
+    cj+1[x] = cj[x]
+ci+1[x] = z
+for j = n[x] to i
+    keyj+1[x] = keyj[x]
+keyi[x] = keyt[y]
+n[x] = n[x] + 1
+
+
+
+
+# Inserting a key on a B-tree in Python
+
+
+# Create a node
+class BTreeNode:
+    def __init__(self, leaf=False):
+        self.leaf = leaf
+        self.keys = []
+        self.child = []
+
+
+# Tree
+class BTree:
+    def __init__(self, t):
+        self.root = BTreeNode(True)
+        self.t = t
+
+    # Insert node
+    def insert(self, k):
+        root = self.root
+        if len(root.keys) == (2 * self.t) - 1:
+            temp = BTreeNode()
+            self.root = temp
+            temp.child.insert(0, root)
+            self.split_child(temp, 0)
+            self.insert_non_full(temp, k)
+        else:
+            self.insert_non_full(root, k)
+
+    # Insert nonfull
+    def insert_non_full(self, x, k):
+        i = len(x.keys) - 1
+        if x.leaf:
+            x.keys.append((None, None))
+            while i >= 0 and k[0] < x.keys[i][0]:
+                x.keys[i + 1] = x.keys[i]
+                i -= 1
+            x.keys[i + 1] = k
+        else:
+            while i >= 0 and k[0] < x.keys[i][0]:
+                i -= 1
+            i += 1
+            if len(x.child[i].keys) == (2 * self.t) - 1:
+                self.split_child(x, i)
+                if k[0] > x.keys[i][0]:
+                    i += 1
+            self.insert_non_full(x.child[i], k)
+
+    # Split the child
+    def split_child(self, x, i):
+        t = self.t
+        y = x.child[i]
+        z = BTreeNode(y.leaf)
+        x.child.insert(i + 1, z)
+        x.keys.insert(i, y.keys[t - 1])
+        z.keys = y.keys[t: (2 * t) - 1]
+        y.keys = y.keys[0: t - 1]
+        if not y.leaf:
+            z.child = y.child[t: 2 * t]
+            y.child = y.child[0: t - 1]
+
+    # Print the tree
+    def print_tree(self, x, l=0):
+        print("Level ", l, " ", len(x.keys), end=":")
+        for i in x.keys:
+            print(i, end=" ")
+        print()
+        l += 1
+        if len(x.child) > 0:
+            for i in x.child:
+                self.print_tree(i, l)
+
+
+def main():
+    B = BTree(3)
+
+    for i in range(10):
+        B.insert((i, 2 * i))
+
+    B.print_tree(B.root)
+
+
+if __name__ == '__main__':
+    main()
+
+
+Complexities
+Insertion	O(1)
+Find Min	O(1)
+Union	O(1)
+Extract Min	O(log n)
+Decrease Key	O(1)
+Delete Node	O(log n)
+////////////////////////////////////////////////////////
+
+
+Deletion from a B-tree
+
+
+#Algorithm for Deleting a key on a B-tree in Python
+
+1) Start at the root and go up to leaf node containing the key K
+2) Find the node n on the path from the root to the leaf node containing K
+    A. If n is root, remove K
+         a. if root has more than one key, done
+         b. if root has only K
+            i) if any of its child nodes can lend a node
+               Borrow key from the child and adjust child links
+            ii) Otherwise merge the children nodes. It will be a new root
+         c. If n is an internal node, remove K
+            i) If n has at least ceil(m/2) keys, done!
+            ii) If n has less than ceil(m/2) keys,
+                If a sibling can lend a key,
+                Borrow key from the sibling and adjust keys in n and the parent node
+                    Adjust child links
+                Else
+                    Merge n with its sibling
+                    Adjust child links
+         d. If n is a leaf node, remove K
+            i) If n has at least ceil(M/2) elements, done!
+                In case the smallest key is deleted, push up the next key
+            ii) If n has less than ceil(m/2) elements
+            If the sibling can lend a key
+                Borrow key from a sibling and adjust keys in n and its parent node
+            Else
+                Merge n and its sibling
+                Adjust keys in the parent node
+
+
+# Program for deleting target keys in Btree node using python
+class BTreeNode:
+    def __init__(self, leaf=False):
+        self.leaf = leaf
+        self.keys = []
+        self.child = []
+
+
+class BTree:
+    def __init__(self, t):
+        self.root = BTreeNode(True)
+        self.t = t
+
+    # Insert a key
+    def insert(self, k):
+        root = self.root
+        if len(root.keys) == (2 * self.t) - 1:
+            temp = BTreeNode()
+            self.root = temp
+            temp.child.insert(0, root)
+            self.split_child(temp, 0)
+            self.insert_non_full(temp, k)
+        else:
+            self.insert_non_full(root, k)
+
+    # Insert non full
+    def insert_non_full(self, x, k):
+        i = len(x.keys) - 1
+        if x.leaf:
+            x.keys.append((None, None))
+            while i >= 0 and k[0] < x.keys[i][0]:
+                x.keys[i + 1] = x.keys[i]
+                i -= 1
+            x.keys[i + 1] = k
+        else:
+            while i >= 0 and k[0] < x.keys[i][0]:
+                i -= 1
+            i += 1
+            if len(x.child[i].keys) == (2 * self.t) - 1:
+                self.split_child(x, i)
+                if k[0] > x.keys[i][0]:
+                    i += 1
+            self.insert_non_full(x.child[i], k)
+
+    # Split the child
+    def split_child(self, x, i):
+        t = self.t
+        y = x.child[i]
+        z = BTreeNode(y.leaf)
+        x.child.insert(i + 1, z)
+        x.keys.insert(i, y.keys[t - 1])
+        z.keys = y.keys[t: (2 * t) - 1]
+        y.keys = y.keys[0: t - 1]
+        if not y.leaf:
+            z.child = y.child[t: 2 * t]
+            y.child = y.child[0: t - 1]
+
+    # Delete a node
+    def delete(self, x, k):
+        t = self.t
+        i = 0
+        while i < len(x.keys) and k[0] > x.keys[i][0]:
+            i += 1
+        if x.leaf:
+            if i < len(x.keys) and x.keys[i][0] == k[0]:
+                x.keys.pop(i)
+                return
+            return
+
+        if i < len(x.keys) and x.keys[i][0] == k[0]:
+            return self.delete_internal_node(x, k, i)
+        elif len(x.child[i].keys) >= t:
+            self.delete(x.child[i], k)
+        else:
+            if i != 0 and i + 2 < len(x.child):
+                if len(x.child[i - 1].keys) >= t:
+                    self.delete_sibling(x, i, i - 1)
+                elif len(x.child[i + 1].keys) >= t:
+                    self.delete_sibling(x, i, i + 1)
+                else:
+                    self.delete_merge(x, i, i + 1)
+            elif i == 0:
+                if len(x.child[i + 1].keys) >= t:
+                    self.delete_sibling(x, i, i + 1)
+                else:
+                    self.delete_merge(x, i, i + 1)
+            elif i + 1 == len(x.child):
+                if len(x.child[i - 1].keys) >= t:
+                    self.delete_sibling(x, i, i - 1)
+                else:
+                    self.delete_merge(x, i, i - 1)
+            self.delete(x.child[i], k)
+
+    # Delete internal node
+    def delete_internal_node(self, x, k, i):
+        t = self.t
+        if x.leaf:
+            if x.keys[i][0] == k[0]:
+                x.keys.pop(i)
+                return
+            return
+
+        if len(x.child[i].keys) >= t:
+            x.keys[i] = self.delete_predecessor(x.child[i])
+            return
+        elif len(x.child[i + 1].keys) >= t:
+            x.keys[i] = self.delete_successor(x.child[i + 1])
+            return
+        else:
+            self.delete_merge(x, i, i + 1)
+            self.delete_internal_node(x.child[i], k, self.t - 1)
+
+    # Delete the predecessor
+    def delete_predecessor(self, x):
+        if x.leaf:
+            return x.pop()
+        n = len(x.keys) - 1
+        if len(x.child[n].keys) >= self.t:
+            self.delete_sibling(x, n + 1, n)
+        else:
+            self.delete_merge(x, n, n + 1)
+        self.delete_predecessor(x.child[n])
+
+    # Delete the successor
+    def delete_successor(self, x):
+        if x.leaf:
+            return x.keys.pop(0)
+        if len(x.child[1].keys) >= self.t:
+            self.delete_sibling(x, 0, 1)
+        else:
+            self.delete_merge(x, 0, 1)
+        self.delete_successor(x.child[0])
+
+    # Delete resolution
+    def delete_merge(self, x, i, j):
+        cnode = x.child[i]
+
+        if j > i:
+            rsnode = x.child[j]
+            cnode.keys.append(x.keys[i])
+            for k in range(len(rsnode.keys)):
+                cnode.keys.append(rsnode.keys[k])
+                if len(rsnode.child) > 0:
+                    cnode.child.append(rsnode.child[k])
+            if len(rsnode.child) > 0:
+                cnode.child.append(rsnode.child.pop())
+            new = cnode
+            x.keys.pop(i)
+            x.child.pop(j)
+        else:
+            lsnode = x.child[j]
+            lsnode.keys.append(x.keys[j])
+            for i in range(len(cnode.keys)):
+                lsnode.keys.append(cnode.keys[i])
+                if len(lsnode.child) > 0:
+                    lsnode.child.append(cnode.child[i])
+            if len(lsnode.child) > 0:
+                lsnode.child.append(cnode.child.pop())
+            new = lsnode
+            x.keys.pop(j)
+            x.child.pop(i)
+
+        if x == self.root and len(x.keys) == 0:
+            self.root = new
+
+    # Delete the sibling
+    def delete_sibling(self, x, i, j):
+        cnode = x.child[i]
+        if i < j:
+            rsnode = x.child[j]
+            cnode.keys.append(x.keys[i])
+            x.keys[i] = rsnode.keys[0]
+            if len(rsnode.child) > 0:
+                cnode.child.append(rsnode.child[0])
+                rsnode.child.pop(0)
+            rsnode.keys.pop(0)
+        else:
+            lsnode = x.child[j]
+            cnode.keys.insert(0, x.keys[i - 1])
+            x.keys[i - 1] = lsnode.keys.pop()
+            if len(lsnode.child) > 0:
+                cnode.child.insert(0, lsnode.child.pop())
+
+    # Print the tree
+    def print_tree(self, x, l=0):
+        print("Level ", l, " ", len(x.keys), end=":")
+        for i in x.keys:
+            print(i, end=" ")
+        print()
+        l += 1
+        if len(x.child) > 0:
+            for i in x.child:
+                self.print_tree(i, l)
+B = BTree(3)
+
+for i in range(10):
+    B.insert((i, 2 * i))
+
+B.print_tree(B.root)
+
+B.delete(B.root, (8,))
+print("\n")
+B.print_tree(B.root)
+
+
+
+Deletion Complexity
+Best case Time complexity: Θ(log n)
+
+Average case Space complexity: Θ(n)
+
+Worst case Space complexity: Θ(n)
+
+
+///////////////////////////////////////////////////////////////////
+Binomial Heap 
+
+Lab 3
+Write a Program to implement Min Heap  in Python
+
+
+class MinHeap:
+	def __init__(self):
+		"""
+		On this implementation the heap list is initialized with a value
+		"""
+		self.heap_list = [0]
+		self.current_size = 0
+
+	def sift_up(self, i):
+		"""
+		Moves the value up in the tree to maintain the heap property.
+		"""
+		# While the element is not the root or the left element
+		Stop = False
+		while (i // 2 > 0) and Stop == False:
+			# If the element is less than its parent swap the elements
+			if self.heap_list[i] < self.heap_list[i // 2]:
+				self.heap_list[i], self.heap_list[i // 2] = self.heap_list[i // 2], self.heap_list[i]
+			else:
+				Stop = True
+			# Move the index to the parent to keep the properties
+			i = i // 2
+
+	def insert(self, k):
+		"""
+		Inserts a value into the heap
+		"""
+		# Append the element to the heap
+		self.heap_list.append(k)
+		# Increase the size of the heap.
+		self.current_size += 1
+		# Move the element to its position from bottom to the top
+		self.sift_up(self.current_size)
+
+	def sift_down(self, i):
+		# if the current node has at least one child
+		while (i * 2) <= self.current_size:
+			# Get the index of the min child of the current node
+			mc = self.min_child(i)
+			# Swap the values of the current element is greater than its min child
+			if self.heap_list[i] > self.heap_list[mc]:
+				self.heap_list[i], self.heap_list[mc] = self.heap_list[mc], self.heap_list[i]
+			i = mc
+
+	def min_child(self, i):
+		# If the current node has only one child, return the index of the unique child
+		if (i * 2)+1 > self.current_size:
+			return i * 2
+		else:
+			# Herein the current node has two children
+			# Return the index of the min child according to their values
+			if self.heap_list[i*2] < self.heap_list[(i*2)+1]:
+				return i * 2
+			else:
+				return (i * 2) + 1
+
+	def delete_min(self):
+		# Equal to 1 since the heap list was initialized with a value
+		if len(self.heap_list) == 1:
+			return 'Empty heap'
+
+		# Get root of the heap (The min value of the heap)
+		root = self.heap_list[1]
+
+		# Move the last value of the heap to the root
+		self.heap_list[1] = self.heap_list[self.current_size]
+
+		# Pop the last value since a copy was set on the root
+		*self.heap_list, _ = self.heap_list
+
+		# Decrease the size of the heap
+		self.current_size -= 1
+
+		# Move down the root (value at index 1) to keep the heap property
+		self.sift_down(1)
+
+		# Return the min value of the heap
+		return root
+"""
+Driver program
+"""
+# Same tree as above example.
+my_heap = MinHeap()
+my_heap.insert(5)
+my_heap.insert(6)
+my_heap.insert(7)
+my_heap.insert(9)
+my_heap.insert(13)
+my_heap.insert(11)
+my_heap.insert(10)
+
+print(my_heap.delete_min()) # removing min node i.e 5
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+# Python3 program to demonstrate Extract min, Deletion()
+# and Decrease key() operations in a fibonacci heap
+import math
+
+# Creating a class to represent a node in the heap
+class node:
+	def __init__(self):
+		parent=None # Parent pointer
+		child=None # Child pointer
+		left=None # Pointer to the node on the left
+		right=None # Pointer to the node on the right
+		key=-1 # Value of the node
+		degree=-1 # Degree of the node
+		mark='' # Black or white mark of the node
+		c='' # Flag for assisting in the Find node function
+
+# Creating min pointer as "mini"
+mini = None
+
+# Declare an integer for number of nodes in the heap
+no_of_nodes = 0
+
+# Function to insert a node in heap
+def insertion(val):
+	global mini,no_of_nodes
+
+	new_node = node()
+	new_node.key = val
+	new_node.degree = 0
+	new_node.mark = 'W'
+	new_node.c = 'N'
+	new_node.parent = None
+	new_node.child = None
+	new_node.left = new_node
+	new_node.right = new_node
+	if (mini != None):
+		mini.left.right = new_node
+		new_node.right = mini
+		new_node.left = mini.left
+		mini.left = new_node
+		if (new_node.key < mini.key):
+			mini = new_node
+	else:
+		mini = new_node
+	no_of_nodes+=1
+
+# Linking the heap nodes in parent child relationship
+def Fibonnaci_link(ptr2, ptr1):
+	ptr2.left.right = ptr2.right
+	ptr2.right.left = ptr2.left
+	if (ptr1.right == ptr1):
+		mini = ptr1
+	ptr2.left = ptr2
+	ptr2.right = ptr2
+	ptr2.parent = ptr1
+	if (ptr1.child == None):
+		ptr1.child = ptr2
+	ptr2.right = ptr1.child
+	ptr2.left = ptr1.child.left
+	ptr1.child.left.right = ptr2
+	ptr1.child.left = ptr2
+	if ptr2.key < ptr1.child.key:
+		ptr1.child = ptr2
+	ptr1.degree+=1
+
+# Consolidating the heap
+def Consolidate():
+	
+	global mini
+	temp2 = math.log2(no_of_nodes)
+	temp3 = int(temp2)
+	arr=[None]*(temp3+1)
+	for i in range(temp3+1):
+		arr[i] = None
+	ptr1 = mini
+	ptr4 = ptr1
+	while True:
+		ptr4 = ptr4.right
+		temp1 = ptr1.degree
+		while (arr[temp1] != None):
+			ptr2 = arr[temp1]
+			if (ptr1.key > ptr2.key):
+				ptr3 = ptr1
+				ptr1 = ptr2
+				ptr2 = ptr3
+			if (ptr2 == mini):
+				mini = ptr1
+			Fibonnaci_link(ptr2, ptr1)
+			if (ptr1.right == ptr1):
+				mini = ptr1
+			arr[temp1] = None
+			temp1+=1
+		arr[temp1] = ptr1
+		ptr1 = ptr1.right
+		if (ptr1 == mini):
+			break
+	mini = None
+	for j in range(temp3+1):
+		if (arr[j] != None):
+			arr[j].left = arr[j]
+			arr[j].right = arr[j]
+			if (mini != None) :
+				mini.left.right = arr[j]
+				arr[j].right = mini
+				arr[j].left = mini.left
+				mini.left = arr[j]
+				if (arr[j].key < mini.key):
+					mini = arr[j]
+			else:
+				mini = arr[j]
+			if mini == None:
+				mini = arr[j]
+			elif arr[j].key < mini.key:
+				mini = arr[j]
+	
+
+# Function to extract minimum node in the heap
+def Extract_min():
+
+	global mini,no_of_nodes
+	if mini == None:
+		print("The heap is empty")
+	else:
+		temp = mini
+		pntr = temp
+		x = None
+		if (temp.child != None):
+
+			x = temp.child
+			while(True):
+				pntr = x.right
+				mini.left.right = x
+				x.right = mini
+				x.left = mini.left
+				mini.left = x
+				if x.key < mini.key:
+					mini = x
+				x.parent = None
+				x = pntr
+				if (pntr == temp.child):
+					break
+
+		temp.left.right = temp.right
+		temp.right.left = temp.left
+		mini = temp.right
+		if temp == temp.right and temp.child == None:
+			mini = None
+		else:
+			mini = temp.right
+			Consolidate()
+		no_of_nodes-=1
+
+
+
+# Cutting a node in the heap to be placed in the root list
+def Cut(found, temp):
+
+	if (found == found.right):
+		temp.child = None
+
+	found.left.right = found.right
+	found.right.left = found.left
+	if (found == temp.child):
+		temp.child = found.right
+
+	temp.degree = temp.degree - 1
+	found.right = found
+	found.left = found
+	mini.left.right = found
+	found.right = mini
+	found.left = mini.left
+	mini.left = found
+	found.parent = None
+	found.mark = 'B'
+
+# Recursive cascade cutting function
+def Cascase_cut(temp):
+
+	ptr5 = temp.parent
+	if (ptr5 != None):
+		if (temp.mark == 'W'):
+			temp.mark = 'B'
+		else:
+			Cut(temp, ptr5)
+			Cascase_cut(ptr5)
+
+# Function to decrease the value of a node in the heap
+def Decrease_key(found, val):
+
+	global mini
+	if (mini == None):
+		print("The Heap is Empty")
+
+	if found == None:
+		print("Node not found in the Heap")
+
+	found.key = val
+
+	temp = found.parent
+	if (temp != None and found.key < temp.key):
+		Cut(found, temp)
+		Cascase_cut(temp)
+
+	if (found.key < mini.key):
+		mini = found
+
+
+# Function to find the given node
+def Find(mini, old_val, val):
+
+	found = None
+	temp5 = mini
+	temp5.c = 'Y'
+	found_ptr = None
+	if (temp5.key == old_val):
+		found_ptr = temp5
+		temp5.c = 'N'
+		found = found_ptr
+		Decrease_key(found, val)
+
+	if (found_ptr == None):
+		if (temp5.child != None):
+			Find(temp5.child, old_val, val)
+		if temp5.right.c != 'Y':
+			Find(temp5.right, old_val, val)
+	temp5.c = 'N'
+	found = found_ptr
+
+
+# Deleting a node from the heap
+def Deletion(val):
+
+	if (mini == None):
+		print("The heap is empty")
+	else:
+		# Decreasing the value of the node to 0
+		Find(mini, val, 0)
+
+		# Calling Extract_min function to
+		# delete minimum value node, which is 0
+		Extract_min()
+		print("Key Deleted")
+
+
+# Function to display the heap
+def display():
+	ptr = mini
+	if (ptr == None):
+		print("The Heap is Empty")
+
+	else:
+		print("The root nodes of Heap are: ")
+		while(True):
+			print(ptr.key,end='')
+			ptr = ptr.right
+			if (ptr != mini):
+				print("-->",end='')
+			if not(ptr != mini and ptr.right != None):
+				break
+		print()
+		print("The heap has {} nodes".format(no_of_nodes))
+
+# Driver code
+if __name__ == '__main__':
+
+	# We will create a heap and insert 3 nodes into it
+	print("Creating an initial heap")
+	insertion(5)
+	insertion(2)
+	insertion(8)
+
+	# Now we will display the root list of the heap
+	display()
+
+	# Now we will extract the minimum value node from the heap
+	print("Extracting min")
+	Extract_min()
+	display()
+
+	# Now we will decrease the value of node '8' to '7'
+	print("Decrease value of 8 to 7")
+	Find(mini, 8, 7)
+	display()
+
+	print("Now we will delete the node '7'")
+	print("Delete the node 7")
+	Deletion(7)
+	display()
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+LAB 4 Write a program to implement Fibonacci heap in python.
+
+class FibonacciTree:
+    def __init__(self, key):
+        self.key = key
+        self.children = []
+        self.order = 0
+ 
+    def add_at_end(self, t):
+        self.children.append(t)
+        self.order = self.order + 1
+ 
+ 
+class FibonacciHeap:
+    def __init__(self):
+        self.trees = []
+        self.least = None
+        self.count = 0
+  
+    def insert(self, key):
+        new_tree = FibonacciTree(key)
+        self.trees.append(new_tree)
+        if (self.least is None or key < self.least.key):
+            self.least = new_tree
+        self.count = self.count + 1
+ 
+    def get_min(self): 
+        if self.least is None:
+            return None
+        return self.least.key
+ 
+    def extract_min(self):
+        smallest = self.least
+        if smallest is not None:
+            for child in smallest.children:
+                self.trees.append(child)
+            self.trees.remove(smallest)
+            if self.trees == []:
+                self.least = None
+            else:
+                self.least = self.trees[0]
+                self.consolidate()
+            self.count = self.count - 1
+            return smallest.key
+ 
+    def consolidate(self):
+        aux = (floor_log2(self.count) + 1)*[None]
+ 
+        while self.trees != []:
+            x = self.trees[0]
+            order = x.order
+            self.trees.remove(x)
+            while aux[order] is not None:
+                y = aux[order]
+                if x.key > y.key:
+                    x, y = y, x
+                x.add_at_end(y)
+                aux[order] = None
+                order = order + 1
+            aux[order] = x
+ 
+        self.least = None
+        for k in aux:
+            if k is not None:
+                self.trees.append(k)
+                if (self.least is None
+                    or k.key < self.least.key):
+                    self.least = k
+ 
+ 
+def floor_log2(x):
+    return math.frexp(x)[1] - 1
+ 
+ 
+fheap = FibonacciHeap()
+ 
+print('Menu')
+print('insert <data>')
+print('min get')
+print('min extract')
+print('quit')
+ 
+while True:
+    do = input('What would you like to do? ').split()
+ 
+    operation = do[0].strip().lower()
+    if operation == 'insert':
+        data = int(do[1])
+        fheap.insert(data)
+    elif operation == 'min':
+        suboperation = do[1].strip().lower()
+        if suboperation == 'get':
+            print('Minimum value: {}'.format(fheap.get_min()))
+        elif suboperation == 'extract':
+            print('Minimum value removed: {}'.format(fheap.extract_min()))
+ 
+    elif operation == 'quit':
+        break
+
+
+OUTPUT 
+
+Run time test cases
+
+Case 1:
+Menu
+insert <data>
+min get
+min extract
+quit
+What would you like to do? insert 3
+What would you like to do? insert 2
+What would you like to do? insert 7
+What would you like to do? min get
+Minimum value: 2
+What would you like to do? min extract
+Minimum value removed: 2
+What would you like to do? min extract
+Minimum value removed: 3
+What would you like to do? min extract
+Minimum value removed: 7
+What would you like to do? min extract
+Minimum value removed: None
+What would you like to do? quit
+ 
+Case 2:
+Menu
+insert <data>
+min get
+min extract
+quit
+What would you like to do? insert 1
+What would you like to do? insert 2
+What would you like to do? insert 3
+What would you like to do? insert 4
+What would you like to do? insert 0
+What would you like to do? min extract
+Minimum value removed: 0
+What would you like to do? min extract
+Minimum value removed: 1
+What would you like to do? min extract
+Minimum value removed: 2
+What would you like to do? min extract
+Minimum value removed: 3
+What would you like to do? min extract
+Minimum value removed: 4
+What would you like to do? quit
+
+--------------------------------------------------------------------------------------------------------------------
+LAB 5
+
+# Implementing Red-Black Tree in Python
+
+Inserting an element into a Red-Black Tree
+While inserting a new node, the new node is always inserted as a RED node. After insertion of a new node, if the tree is violating the properties of the red-black tree then, we do the following operations.
+
+Recolor
+Rotation
+Algorithm to insert a node
+Following steps are followed for inserting a new element into a red-black tree:
+
+Let y be the leaf (ie. NIL) and x be the root of the tree.
+Check if the tree is empty (ie. whether x is NIL). If yes, insert newNode as a root node and color it black.
+Else, repeat steps following steps until leaf (NIL) is reached.
+Compare newKey with rootKey.
+If newKey is greater than rootKey, traverse through the right subtree.
+Else traverse through the left subtree.
+Assign the parent of the leaf as a parent of newNode.
+If leafKey is greater than newKey, make newNode as rightChild.
+Else, make newNode as leftChild.
+Assign NULL to the left and rightChild of newNode.
+Assign RED color to newNode.
+Call InsertFix-algorithm to maintain the property of red-black tree if violated.
+Why newly inserted nodes are always red in a red-black tree?
+
+This is because inserting a red node does not violate the depth property of a red-black tree.
+
+If you attach a red node to a red node, then the rule is violated but it is easier to fix this problem than the problem introduced by violating the depth property.
+
+Algorithm to maintain red-black property after insertion
+This algorithm is used for maintaining the property of a red-black tree if the insertion of a newNode violates this property.
+
+Do the following while the parent of newNode p is RED.
+If p is the left child of grandParent gP of z, do the following.
+Case-I:
+If the color of the right child of gP of z is RED, set the color of both the children of gP as BLACK and the color of gP as RED.
+Assign gP to newNode.
+Case-II:
+Else if newNode is the right child of p then, assign p to newNode.
+Left-Rotate newNode.
+Case-III:
+Set color of p as BLACK and color of gP as RED.
+Right-Rotate gP.
+Else, do the following.
+If the color of the left child of gP of z is RED, set the color of both the children of gP as BLACK and the color of gP as RED.
+Assign gP to newNode.
+Else if newNode is the left child of p then, assign p to newNode and Right-Rotate newNode.
+Set color of p as BLACK and color of gP as RED.
+Left-Rotate gP.
+Set the root of the tree as BLACK.
+Deleting an element from a Red-Black Tree
+This operation removes a node from the tree. After deleting a node, the red-black property is maintained again.
+
+Algorithm to delete a node
+Save the color of nodeToBeDeleted in origrinalColor.
+If the left child of nodeToBeDeleted is NULL
+Assign the right child of nodeToBeDeleted to x.
+Transplant nodeToBeDeleted with x.
+Else if the right child of nodeToBeDeleted is NULL
+Assign the left child of nodeToBeDeleted into x.
+Transplant nodeToBeDeleted with x.
+Else
+Assign the minimum of right subtree of noteToBeDeleted into y.
+Save the color of y in originalColor.
+Assign the rightChild of y into x.
+If y is a child of nodeToBeDeleted, then set the parent of x as y.
+Else, transplant y with rightChild of y.
+Transplant nodeToBeDeleted with y.
+Set the color of y with originalColor.
+If the originalColor is BLACK, call DeleteFix(x).
+Algorithm to maintain Red-Black property after deletion
+This algorithm is implemented when a black node is deleted because it violates the black depth property of the red-black tree.
+
+This violation is corrected by assuming that node x (which is occupying y's original position) has an extra black. This makes node x neither red nor black. It is either doubly black or black-and-red. This violates the red-black properties.
+
+However, the color attribute of x is not changed rather the extra black is represented in x's pointing to the node.
+
+The extra black can be removed if
+
+It reaches the root node.
+If x points to a red-black node. In this case, x is colored black.
+Suitable rotations and recoloring are performed.
+The following algorithm retains the properties of a red-black tree.
+
+Do the following until the x is not the root of the tree and the color of x is BLACK
+If x is the left child of its parent then,
+Assign w to the sibling of x.
+If the right child of parent of x is RED,
+Case-I:
+Set the color of the right child of the parent of x as BLACK.
+Set the color of the parent of x as RED.
+Left-Rotate the parent of x.
+Assign the rightChild of the parent of x to w.
+If the color of both the right and the leftChild of w is BLACK,
+Case-II:
+Set the color of w as RED
+Assign the parent of x to x.
+Else if the color of the rightChild of w is BLACK
+Case-III:
+Set the color of the leftChild of w as BLACK
+Set the color of w as RED
+Right-Rotate w.
+Assign the rightChild of the parent of x to w.
+If any of the above cases do not occur, then do the following.
+Case-IV:
+Set the color of w as the color of the parent of x.
+Set the color of the parent of x as BLACK.
+Set the color of the right child of w as BLACK.
+Left-Rotate the parent of x.
+Set x as the root of the tree.
+Else the same as above with right changed to left and vice versa.
+Set the color of x as BLACK.
+
+
+LAB-5
+
+Write a Program to implement Red-Black Trees in Python.
+
+
+import sys
+# Node creation
+class Node():
+    def __init__(self, item):         
+        self.item = item               #value of node
+        self.parent = None             #Parent of Node
+        self.left = None                #Left child of Node
+        self.right = None              #Right child of node
+        self.color = 1                # New node inserted is always Red  
+
+class RedBlackTree():
+    def __init__(self):
+        self.TNULL = Node(0)
+        self.TNULL.color = 0
+        self.TNULL.left = None
+        self.TNULL.right = None
+        self.root = self.TNULL
+
+    # Preorder
+    def pre_order_helper(self, node):
+        if node != TNULL:
+            sys.stdout.write(node.item + " ")
+            self.pre_order_helper(node.left)
+            self.pre_order_helper(node.right)
+
+    # Inorder
+    def in_order_helper(self, node):
+        if node != TNULL:
+            self.in_order_helper(node.left)
+            sys.stdout.write(node.item + " ")
+            self.in_order_helper(node.right)
+
+    # Postorder
+    def post_order_helper(self, node):
+        if node != TNULL:
+            self.post_order_helper(node.left)
+            self.post_order_helper(node.right)
+            sys.stdout.write(node.item + " ")
+
+    # Search the tree
+    def search_tree_helper(self, node, key):
+        if node == TNULL or key == node.item:
+            return node
+
+        if key < node.item:
+            return self.search_tree_helper(node.left, key)
+        return self.search_tree_helper(node.right, key)
+
+    # Balancing the tree after deletion
+    def delete_fix(self, x):
+        while x != self.root and x.color == 0:
+            if x == x.parent.left:
+                s = x.parent.right
+                if s.color == 1:
+                    s.color = 0
+                    x.parent.color = 1
+                    self.left_rotate(x.parent)
+                    s = x.parent.right
+
+                if s.left.color == 0 and s.right.color == 0:
+                    s.color = 1
+                    x = x.parent
+                else:
+                    if s.right.color == 0:
+                        s.left.color = 0
+                        s.color = 1
+                        self.right_rotate(s)
+                        s = x.parent.right
+
+                    s.color = x.parent.color
+                    x.parent.color = 0
+                    s.right.color = 0
+                    self.left_rotate(x.parent)
+                    x = self.root
+            else:
+                s = x.parent.left
+                if s.color == 1:
+                    s.color = 0
+                    x.parent.color = 1
+                    self.right_rotate(x.parent)
+                    s = x.parent.left
+
+                if s.right.color == 0 and s.right.color == 0:
+                    s.color = 1
+                    x = x.parent
+                else:
+                    if s.left.color == 0:
+                        s.right.color = 0
+                        s.color = 1
+                        self.left_rotate(s)
+                        s = x.parent.left
+
+                    s.color = x.parent.color
+                    x.parent.color = 0
+                    s.left.color = 0
+                    self.right_rotate(x.parent)
+                    x = self.root
+        x.color = 0
+
+    def __rb_transplant(self, u, v):
+        if u.parent == None:
+            self.root = v
+        elif u == u.parent.left:
+            u.parent.left = v
+        else:
+            u.parent.right = v
+        v.parent = u.parent
+
+    # Node deletion
+    def delete_node_helper(self, node, key):
+        z = self.TNULL
+        while node != self.TNULL:
+            if node.item == key:
+                z = node
+
+            if node.item <= key:
+                node = node.right
+            else:
+                node = node.left
+
+        if z == self.TNULL:
+            print("Cannot find key in the tree")
+            return
+
+        y = z
+        y_original_color = y.color
+        if z.left == self.TNULL:
+            x = z.right
+            self.__rb_transplant(z, z.right)
+        elif (z.right == self.TNULL):
+            x = z.left
+            self.__rb_transplant(z, z.left)
+        else:
+            y = self.minimum(z.right)
+            y_original_color = y.color
+            x = y.right
+            if y.parent == z:
+                x.parent = y
+            else:
+                self.__rb_transplant(y, y.right)
+                y.right = z.right
+                y.right.parent = y
+
+            self.__rb_transplant(z, y)
+            y.left = z.left
+            y.left.parent = y
+            y.color = z.color
+        if y_original_color == 0:
+            self.delete_fix(x)
+
+    # Balance the tree after insertion
+    def fix_insert(self, k):
+        while k.parent.color == 1:
+            if k.parent == k.parent.parent.right:
+                u = k.parent.parent.left
+                if u.color == 1:
+                    u.color = 0
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    k = k.parent.parent
+                else:
+                    if k == k.parent.left:
+                        k = k.parent
+                        self.right_rotate(k)
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.left_rotate(k.parent.parent)
+            else:
+                u = k.parent.parent.right
+
+                if u.color == 1:
+                    u.color = 0
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    k = k.parent.parent
+                else:
+                    if k == k.parent.right:
+                        k = k.parent
+                        self.left_rotate(k)
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.right_rotate(k.parent.parent)
+            if k == self.root:
+                break
+        self.root.color = 0
+
+    # Printing the tree
+    def __print_helper(self, node, indent, last):
+        if node != self.TNULL:
+            sys.stdout.write(indent)
+            if last:
+                sys.stdout.write("R----")
+                indent += "     "
+            else:
+                sys.stdout.write("L----")
+                indent += "|    "
+
+            s_color = "RED" if node.color == 1 else "BLACK"
+            print(str(node.item) + "(" + s_color + ")")
+            self.__print_helper(node.left, indent, False)
+            self.__print_helper(node.right, indent, True)
+
+    def preorder(self):
+        self.pre_order_helper(self.root)
+
+    def inorder(self):
+        self.in_order_helper(self.root)
+
+    def postorder(self):
+        self.post_order_helper(self.root)
+
+    def searchTree(self, k):
+        return self.search_tree_helper(self.root, k)
+
+    def minimum(self, node):
+        while node.left != self.TNULL:
+            node = node.left
+        return node
+
+    def maximum(self, node):
+        while node.right != self.TNULL:
+            node = node.right
+        return node
+
+    def successor(self, x):
+        if x.right != self.TNULL:
+            return self.minimum(x.right)
+
+        y = x.parent
+        while y != self.TNULL and x == y.right:
+            x = y
+            y = y.parent
+        return y
+
+    def predecessor(self,  x):
+        if (x.left != self.TNULL):
+            return self.maximum(x.left)
+
+        y = x.parent
+        while y != self.TNULL and x == y.left:
+            x = y
+            y = y.parent
+
+        return y
+
+    def left_rotate(self, x):
+        y = x.right
+        x.right = y.left
+        if y.left != self.TNULL:
+            y.left.parent = x
+
+        y.parent = x.parent
+        if x.parent == None:
+            self.root = y
+        elif x == x.parent.left:
+            x.parent.left = y
+        else:
+            x.parent.right = y
+        y.left = x
+        x.parent = y
+
+    def right_rotate(self, x):
+        y = x.left
+        x.left = y.right
+        if y.right != self.TNULL:
+            y.right.parent = x
+
+        y.parent = x.parent
+        if x.parent == None:
+            self.root = y
+        elif x == x.parent.right:
+            x.parent.right = y
+        else:
+            x.parent.left = y
+        y.right = x
+        x.parent = y
+
+    def insert(self, key):
+        node = Node(key)
+        node.parent = None
+        node.item = key
+        node.left = self.TNULL
+        node.right = self.TNULL
+        node.color = 1
+
+        y = None
+        x = self.root
+
+        while x != self.TNULL:
+            y = x
+            if node.item < x.item:
+                x = x.left
+            else:
+                x = x.right
+
+        node.parent = y
+        if y == None:
+            self.root = node
+        elif node.item < y.item:
+            y.left = node
+        else:
+            y.right = node
+
+        if node.parent == None:
+            node.color = 0
+            return
+
+        if node.parent.parent == None:
+            return
+
+        self.fix_insert(node)
+
+    def get_root(self):
+        return self.root
+
+    def delete_node(self, item):
+        self.delete_node_helper(self.root, item)
+
+    def print_tree(self):
+        self.__print_helper(self.root, "", True)
+
+
+if __name__ == "__main__":
+    bst = RedBlackTree()
+
+    bst.insert(55)
+    bst.insert(40)
+    bst.insert(65)
+    bst.insert(60)
+    bst.insert(75)
+    bst.insert(57)
+
+    bst.print_tree()
+
+    print("\nAfter deleting an element")
+    bst.delete_node(40)
+    bst.print_tree()
+
+OUTPUT
+
+  L----57(RED)
+     |    L----55(BLACK)
+     |    R----60(BLACK)
+     R----75(BLACK)
+
+
+--------------------------------------------------------------
+
+# Define Node
+class Node():
+    def __init__(self,val):
+        self.val = val                                   # Value of Node
+        self.parent = None                               # Parent of Node
+        self.left = None                                 # Left Child of Node
+        self.right = None                                # Right Child of Node
+        self.color = 1                                   # Red Node as new node is always inserted as Red Node
+
+# Define R-B Tree
+class RBTree():
+    def __init__(self):
+        self.NULL = Node ( 0 )
+        self.NULL.color = 0
+        self.NULL.left = None
+        self.NULL.right = None
+        self.root = self.NULL
+
+
+    # Insert New Node
+    def insertNode(self, key):
+        node = Node(key)
+        node.parent = None
+        node.val = key
+        node.left = self.NULL
+        node.right = self.NULL
+        node.color = 1                                   # Set root colour as Red
+
+        y = None
+        x = self.root
+
+        while x != self.NULL :                           # Find position for new node
+            y = x
+            if node.val < x.val :
+                x = x.left
+            else :
+                x = x.right
+
+        node.parent = y                                  # Set parent of Node as y
+        if y == None :                                   # If parent i.e, is none then it is root node
+            self.root = node
+        elif node.val < y.val :                          # Check if it is right Node or Left Node by checking the value
+            y.left = node
+        else :
+            y.right = node
+
+        if node.parent == None :                         # Root node is always Black
+            node.color = 0
+            return
+
+        if node.parent.parent == None :                  # If parent of node is Root Node
+            return
+
+        self.fixInsert ( node )                          # Else call for Fix Up
+
+
+    def minimum(self, node):
+        while node.left != self.NULL:
+            node = node.left
+        return node
+
+
+    # Code for left rotate
+    def LR ( self , x ) :
+        y = x.right                                      # Y = Right child of x
+        x.right = y.left                                 # Change right child of x to left child of y
+        if y.left != self.NULL :
+            y.left.parent = x
+
+        y.parent = x.parent                              # Change parent of y as parent of x
+        if x.parent == None :                            # If parent of x == None ie. root node
+            self.root = y                                # Set y as root
+        elif x == x.parent.left :
+            x.parent.left = y
+        else :
+            x.parent.right = y
+        y.left = x
+        x.parent = y
+
+
+    # Code for right rotate
+    def RR ( self , x ) :
+        y = x.left                                       # Y = Left child of x
+        x.left = y.right                                 # Change left child of x to right child of y
+        if y.right != self.NULL :
+            y.right.parent = x
+
+        y.parent = x.parent                              # Change parent of y as parent of x
+        if x.parent == None :                            # If x is root node
+            self.root = y                                # Set y as root
+        elif x == x.parent.right :
+            x.parent.right = y
+        else :
+            x.parent.left = y
+        y.right = x
+        x.parent = y
+
+
+    # Fix Up Insertion
+    def fixInsert(self, k):
+        while k.parent.color == 1:                        # While parent is red
+            if k.parent == k.parent.parent.right:         # if parent is right child of its parent
+                u = k.parent.parent.left                  # Left child of grandparent
+                if u.color == 1:                          # if color of left child of grandparent i.e, uncle node is red
+                    u.color = 0                           # Set both children of grandparent node as black
+                    k.parent.color = 0
+                    k.parent.parent.color = 1             # Set grandparent node as Red
+                    k = k.parent.parent                   # Repeat the algo with Parent node to check conflicts
+                else:
+                    if k == k.parent.left:                # If k is left child of it's parent
+                        k = k.parent
+                        self.RR(k)                        # Call for right rotation
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.LR(k.parent.parent)
+            else:                                         # if parent is left child of its parent
+                u = k.parent.parent.right                 # Right child of grandparent
+                if u.color == 1:                          # if color of right child of grandparent i.e, uncle node is red
+                    u.color = 0                           # Set color of childs as black
+                    k.parent.color = 0
+                    k.parent.parent.color = 1             # set color of grandparent as Red
+                    k = k.parent.parent                   # Repeat algo on grandparent to remove conflicts
+                else:
+                    if k == k.parent.right:               # if k is right child of its parent
+                        k = k.parent
+                        self.LR(k)                        # Call left rotate on parent of k
+                    k.parent.color = 0
+                    k.parent.parent.color = 1
+                    self.RR(k.parent.parent)              # Call right rotate on grandparent
+            if k == self.root:                            # If k reaches root then break
+                break
+        self.root.color = 0                               # Set color of root as black
+
+
+    # Function to fix issues after deletion
+    def fixDelete ( self , x ) :
+        while x != self.root and x.color == 0 :           # Repeat until x reaches nodes and color of x is black
+            if x == x.parent.left :                       # If x is left child of its parent
+                s = x.parent.right                        # Sibling of x
+                if s.color == 1 :                         # if sibling is red
+                    s.color = 0                           # Set its color to black
+                    x.parent.color = 1                    # Make its parent red
+                    self.LR ( x.parent )                  # Call for left rotate on parent of x
+                    s = x.parent.right
+                # If both the child are black
+                if s.left.color == 0 and s.right.color == 0 :
+                    s.color = 1                           # Set color of s as red
+                    x = x.parent
+                else :
+                    if s.right.color == 0 :               # If right child of s is black
+                        s.left.color = 0                  # set left child of s as black
+                        s.color = 1                       # set color of s as red
+                        self.RR ( s )                     # call right rotation on x
+                        s = x.parent.right
+
+                    s.color = x.parent.color
+                    x.parent.color = 0                    # Set parent of x as black
+                    s.right.color = 0
+                    self.LR ( x.parent )                  # call left rotation on parent of x
+                    x = self.root
+            else :                                        # If x is right child of its parent
+                s = x.parent.left                         # Sibling of x
+                if s.color == 1 :                         # if sibling is red
+                    s.color = 0                           # Set its color to black
+                    x.parent.color = 1                    # Make its parent red
+                    self.RR ( x.parent )                  # Call for right rotate on parent of x
+                    s = x.parent.left
+
+                if s.right.color == 0 and s.right.color == 0 :
+                    s.color = 1
+                    x = x.parent
+                else :
+                    if s.left.color == 0 :                # If left child of s is black
+                        s.right.color = 0                 # set right child of s as black
+                        s.color = 1
+                        self.LR ( s )                     # call left rotation on x
+                        s = x.parent.left
+
+                    s.color = x.parent.color
+                    x.parent.color = 0
+                    s.left.color = 0
+                    self.RR ( x.parent )
+                    x = self.root
+        x.color = 0
+
+
+    # Function to transplant nodes
+    def __rb_transplant ( self , u , v ) :
+        if u.parent == None :
+            self.root = v
+        elif u == u.parent.left :
+            u.parent.left = v
+        else :
+            u.parent.right = v
+        v.parent = u.parent
+
+
+    # Function to handle deletion
+    def delete_node_helper ( self , node , key ) :
+        z = self.NULL
+        while node != self.NULL :                          # Search for the node having that value/ key and store it in 'z'
+            if node.val == key :
+                z = node
+
+            if node.val <= key :
+                node = node.right
+            else :
+                node = node.left
+
+        if z == self.NULL :                                # If Kwy is not present then deletion not possible so return
+            print ( "Value not present in Tree !!" )
+            return
+
+        y = z
+        y_original_color = y.color                          # Store the color of z- node
+        if z.left == self.NULL :                            # If left child of z is NULL
+            x = z.right                                     # Assign right child of z to x
+            self.__rb_transplant ( z , z.right )            # Transplant Node to be deleted with x
+        elif (z.right == self.NULL) :                       # If right child of z is NULL
+            x = z.left                                      # Assign left child of z to x
+            self.__rb_transplant ( z , z.left )             # Transplant Node to be deleted with x
+        else :                                              # If z has both the child nodes
+            y = self.minimum ( z.right )                    # Find minimum of the right sub tree
+            y_original_color = y.color                      # Store color of y
+            x = y.right
+            if y.parent == z :                              # If y is child of z
+                x.parent = y                                # Set parent of x as y
+            else :
+                self.__rb_transplant ( y , y.right )
+                y.right = z.right
+                y.right.parent = y
+
+            self.__rb_transplant ( z , y )
+            y.left = z.left
+            y.left.parent = y
+            y.color = z.color
+        if y_original_color == 0 :                          # If color is black then fixing is needed
+            self.fixDelete ( x )
+
+
+    # Deletion of node
+    def delete_node ( self , val ) :
+        self.delete_node_helper ( self.root , val )         # Call for deletion
+
+
+    # Function to print
+    def __printCall ( self , node , indent , last ) :
+        if node != self.NULL :
+            print(indent, end=' ')
+            if last :
+                print ("R----",end= ' ')
+                indent += "     "
+            else :
+                print("L----",end=' ')
+                indent += "|    "
+
+            s_color = "RED" if node.color == 1 else "BLACK"
+            print ( str ( node.val ) + "(" + s_color + ")" )
+            self.__printCall ( node.left , indent , False )
+            self.__printCall ( node.right , indent , True )
+
+    # Function to call print
+    def print_tree ( self ) :
+        self.__printCall ( self.root , "" , True )
+
+
+if __name__ == "__main__":
+    bst = RBTree()
+
+    bst.insertNode(10)
+    bst.insertNode(20)
+    bst.insertNode(30)
+    bst.insertNode(5)
+    bst.insertNode(4)
+    bst.insertNode(2)
+
+    bst.print_tree()
+
+    print("\nAfter deleting an element")
+    bst.delete_node(2)
+    bst.print_tree()
+
+OUTPUT
+ R---- 20(BLACK)
+      L---- 5(RED)
+     |     L---- 4(BLACK)
+     |    |     L---- 2(RED)
+     |     R---- 10(BLACK)
+      R---- 30(BLACK)
+
+After deleting an element
+ R---- 20(BLACK)
+      L---- 5(RED)
+     |     L---- 4(BLACK)
+     |     R---- 10(BLACK)
+      R---- 30(BLACK)
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+Lab 6
+Write a program for Binary Search in python. 
+
+
+def binarySearch(array, x, low, high):
+
+    if high >= low:
+
+        mid = low + (high - low)//2
+
+        # If found at mid, then return it
+        if array[mid] == x:
+            return mid
+
+        # Search the left half
+        elif array[mid] > x:
+            return binarySearch(array, x, low, mid-1)
+
+        # Search the right half
+        else:
+            return binarySearch(array, x, mid + 1, high)
+
+    else:
+        return -1
+
+
+array = [3, 4, 5, 6, 7, 8, 9]
+x = 4
+
+result = binarySearch(array, x, 0, len(array)-1)
+
+if result != -1:
+    print("Element is present at index " + str(result))
+else:
+    print("Not found")
+
+/////////////////////////////////
+
+Lab 6
+Write a Python program for implementation of heap Sort
+
+# To heapify subtree rooted at index i.
+# n is size of heap
+
+
+def heapify(arr, N, i):
+	largest = i # Initialize largest as root
+	l = 2 * i + 1	 # left = 2*i + 1
+	r = 2 * i + 2	 # right = 2*i + 2
+
+	# See if left child of root exists and is
+	# greater than root
+	if l < N and arr[largest] < arr[l]:
+		largest = l
+
+	# See if right child of root exists and is
+	# greater than root
+	if r < N and arr[largest] < arr[r]:
+		largest = r
+
+	# Change root, if needed
+	if largest != i:
+		arr[i], arr[largest] = arr[largest], arr[i] # swap
+
+		# Heapify the root.
+		heapify(arr, N, largest)
+
+# The main function to sort an array of given size
+
+
+def heapSort(arr):
+	N = len(arr)
+
+	# Build a maxheap.
+	for i in range(N//2 - 1, -1, -1):
+		heapify(arr, N, i)
+
+	# One by one extract elements
+	for i in range(N-1, 0, -1):
+		arr[i], arr[0] = arr[0], arr[i] # swap
+		heapify(arr, i, 0)
+
+
+# Driver's code
+if __name__ == '__main__':
+	arr = [12, 11, 13, 5, 6, 7]
+
+	# Function call
+	heapSort(arr)
+	N = len(arr)
+
+	print("Sorted array is")
+	for i in range(N):
+		print("%d" % arr[i], end=" ")
+
+////////////////////////////////////////////////////////////
+
+Write a program in python to implement Merge sort
+
+def merge_sort(arr):
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
+
+        merge_sort(left_half)
+        merge_sort(right_half)
+
+        i = j = k = 0
+
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
+                i += 1
+            else:
+                arr[k] = right_half[j]
+                j += 1
+            k += 1
+
+        while i < len(left_half):
+            arr[k] = left_half[i]
+            i += 1
+            k += 1
+
+        while j < len(right_half):
+            arr[k] = right_half[j]
+            j += 1
+            k += 1
+
+    return arr
+    
+arr = [9, 4, 7, 2, 5, 3, 6, 8, 1]
+sorted_arr = merge_sort(arr)
+print(sorted_arr)
+
+
+
+OUTPUT
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////
+
+
+# Python program for implementation of MergeSort
+
+# Merges two subarrays of arr[].
+# First subarray is arr[l..m]
+# Second subarray is arr[m+1..r]
+
+
+def merge(arr, l, m, r):
+	n1 = m - l + 1
+	n2 = r - m
+
+	# create temp arrays
+	L = [0] * (n1)
+	R = [0] * (n2)
+
+	# Copy data to temp arrays L[] and R[]
+	for i in range(0, n1):
+		L[i] = arr[l + i]
+
+	for j in range(0, n2):
+		R[j] = arr[m + 1 + j]
+
+	# Merge the temp arrays back into arr[l..r]
+	i = 0	 # Initial index of first subarray
+	j = 0	 # Initial index of second subarray
+	k = l	 # Initial index of merged subarray
+
+	while i < n1 and j < n2:
+		if L[i] <= R[j]:
+			arr[k] = L[i]
+			i += 1
+		else:
+			arr[k] = R[j]
+			j += 1
+		k += 1
+
+	# Copy the remaining elements of L[], if there
+	# are any
+	while i < n1:
+		arr[k] = L[i]
+		i += 1
+		k += 1
+
+	# Copy the remaining elements of R[], if there
+	# are any
+	while j < n2:
+		arr[k] = R[j]
+		j += 1
+		k += 1
+
+# l is for left index and r is right index of the
+# sub-array of arr to be sorted
+
+
+def mergeSort(arr, l, r):
+	if l < r:
+
+		# Same as (l+r)//2, but avoids overflow for
+		# large l and h
+		m = l+(r-l)//2
+
+		# Sort first and second halves
+		mergeSort(arr, l, m)
+		mergeSort(arr, m+1, r)
+		merge(arr, l, m, r)
+
+
+# Driver code to test above
+arr = [12, 11, 13, 5, 6, 7]
+n = len(arr)
+print("Given array is")
+for i in range(n):
+	print("%d" % arr[i],end=" ")
+
+mergeSort(arr, 0, n-1)
+print("\n\nSorted array is")
+for i in range(n):
+	print("%d" % arr[i],end=" ")
+
+
+///////////////////////////////////////////
+
+# Python program for implementation of Quicksort Sort
+
+# This implementation utilizes pivot as the last element in the nums list
+# It has a pointer to keep track of the elements smaller than the pivot
+# At the very end of partition() function, the pointer is swapped with the pivot
+# to come up with a "sorted" nums relative to the pivot
+
+
+# Function to find the partition position
+def partition(array, low, high):
+
+	# choose the rightmost element as pivot
+	pivot = array[high]
+
+	# pointer for greater element
+	i = low - 1
+
+	# traverse through all elements
+	# compare each element with pivot
+	for j in range(low, high):
+		if array[j] <= pivot:
+
+			# If element smaller than pivot is found
+			# swap it with the greater element pointed by i
+			i = i + 1
+
+			# Swapping element at i with element at j
+			(array[i], array[j]) = (array[j], array[i])
+
+	# Swap the pivot element with the greater element specified by i
+	(array[i + 1], array[high]) = (array[high], array[i + 1])
+
+	# Return the position from where partition is done
+	return i + 1
+
+# function to perform quicksort
+
+
+def quickSort(array, low, high):
+	if low < high:
+
+		# Find pivot element such that
+		# element smaller than pivot are on the left
+		# element greater than pivot are on the right
+		pi = partition(array, low, high)
+
+		# Recursive call on the left of pivot
+		quickSort(array, low, pi - 1)
+
+		# Recursive call on the right of pivot
+		quickSort(array, pi + 1, high)
+
+
+data = [1, 7, 4, 1, 10, 9, -2]
+print("Unsorted Array")
+print(data)
+
+size = len(data)
+
+quickSort(data, 0, size - 1)
+
+print('Sorted Array in Ascending Order:')
+print(data)
+
+
+OUTPUT:
+
+Unsorted Array
+[1, 7, 4, 1, 10, 9, -2]
+Sorted Array in Ascending Order:
+[-2, 1, 1, 4, 7, 9, 10]
